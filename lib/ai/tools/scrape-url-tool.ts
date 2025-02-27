@@ -1,10 +1,16 @@
 import { tool } from "ai";
 import { z } from "zod";
 import FirecrawlApp from "@mendable/firecrawl-js";
+import {
+  multipleListingSchema,
+  multipleTeamMemberSchema,
+  singleListingSchema,
+  singleTeamMemberSchema,
+} from "@/lib/schemas";
 
 const app = new FirecrawlApp({ apiKey: process.env.FIRECRAWL_API_KEY });
 
-const items = [
+const scrapedItems = [
   {
     type: "founder",
     firstName: "Tom",
@@ -135,53 +141,43 @@ export const scrapeUrlTool = tool({
     "Scrape all content from the provided URL. If the content is valuable then extract it and return it in a structured way. If the situation requires getting content from a webpage then use this tool",
   parameters: z.object({
     url: z.string().describe("The url to scrape content from"),
+    dataType: z
+      .enum(["team-member", "deal"])
+      .describe("The type of data to extract: 'team-member' or 'deal'"),
   }),
-  execute: async ({ url }) => {
-    if (!url) {
-      throw new Error("URL is required, could not find url");
+  execute: async ({ url, dataType }) => {
+    console.log(`Extracting ${dataType} from`, url);
+    console.log(`Extracting from`, url);
+
+    let extractionPrompt = "extract all valuable content from this url";
+
+    if (dataType === "team-member") {
+      extractionPrompt = `
+        Extract all team members from this web page and capture all relevant information as you can from them and return the data as a JSON array of objects.
+      `;
+    } else if (dataType === "deal") {
+      extractionPrompt = `
+        Extract all deals from the webpage and return the data as a JSON array of objects.
+      `;
     }
 
-    console.log("Getting content for", url);
+    const scrapeResponse = await app.extract([url], {
+      prompt: extractionPrompt,
+    });
 
-    const userPrompt = `
-      Extract all valuable and useful content from the page
-    `;
-    const systemPrompt = `
-      You are an helpful AI Assistant that extracts structured data from a webpage.
-    `;
+    console.log("scrape Response", scrapeResponse);
 
-    // const crawlResponse = await app.extract([url], {
-    //   systemPrompt,
-    //   prompt: userPrompt,
-    // });
+    if (!scrapeResponse.success) {
+      console.log("Scrape failed:", scrapeResponse.error);
+      throw new Error(`Failed to scrape and extract: ${scrapeResponse.error}`);
+    }
 
-    // Define schema to extract contents into
-    // const schema = z.array(
-    //   z.object({
-    //     type: z.literal("team"),
-    //     firstName: z.string(),
-    //     lastName: z.string(),
-    //     designation: z.string().optional(),
-    //     linkedInUrl: z.string().optional(),
-    //     detailPageUrl: z.string().optional(),
-    //   })
-    // );
+    // @ts-ignore
+    const items = scrapeResponse.data;
+    console.log("items", items);
 
-    // const crawlResponse = await app.scrapeUrl(url, {
-    //   formats: ["json"],
-    //   jsonOptions: { schema: schema },
-    // });
+    return { scrapedItems, dataType: "team-member" };
 
-    // if (!crawlResponse.success) {
-    //   console.log("crawlResponse failed", crawlResponse.error);
-    //   throw new Error(`Failed to crawl and extract: ${crawlResponse.error}`);
-    // }
-
-    // console.log("crawlResponse", crawlResponse.json);
-
-    // // @ts-ignore
-    // const items = crawlResponse.json.items;
-
-    return { items };
+    // return { dataType, items, url };
   },
 });

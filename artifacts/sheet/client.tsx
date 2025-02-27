@@ -7,7 +7,7 @@ import {
   UndoIcon,
 } from "@/components/icons";
 import { SpreadsheetEditor } from "@/components/sheet-editor";
-import { Download } from "lucide-react";
+import { Database, DatabaseIcon, Download } from "lucide-react";
 import { parse, unparse } from "papaparse";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
@@ -45,6 +45,22 @@ export const sheetArtifact = new Artifact<"sheet", Metadata>({
     );
   },
   actions: [
+    {
+      icon: <DatabaseIcon size={18} />,
+      description: "Upload to Database",
+      onClick: ({ content, handleVersionChange, metadata }) => {
+        console.log("content to save", content);
+        console.log("content metadata", metadata);
+        // Parse CSV content
+        // @ts-ignore
+        const parsed = parse(content, {
+          columns: true,
+          skip_empty_lines: true,
+        });
+        const items = parsed;
+        console.log("parsed items", items);
+      },
+    },
     {
       icon: <Download size={18} />,
       description: "Download Sheet Content",

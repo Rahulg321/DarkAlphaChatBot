@@ -12,6 +12,7 @@ import {
   pgEnum,
   numeric,
   unique,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 // command to run a docker for connecting postgres
@@ -151,14 +152,14 @@ export const deal = pgTable(
     email: varchar("email", { length: 255 }),
     linkedinUrl: varchar("linkedinUrl", { length: 255 }),
     workPhone: varchar("workPhone", { length: 255 }),
-    dealCaption: text("dealCaption").notNull(),
-    revenue: numeric("revenue").notNull(),
-    ebitda: numeric("ebitda").notNull(),
+    dealCaption: text("dealCaption"),
+    revenue: numeric("revenue"),
+    ebitda: numeric("ebitda"),
     title: varchar("title", { length: 255 }),
     grossRevenue: numeric("grossRevenue"),
     askingPrice: numeric("askingPrice"),
-    ebitdaMargin: numeric("ebitdaMargin").notNull(),
-    industry: varchar("industry", { length: 255 }).notNull(),
+    ebitdaMargin: numeric("ebitdaMargin"),
+    industry: varchar("industry", { length: 255 }),
     dealType: dealTypeEnum("dealType").default("MANUAL").notNull(),
     sourceWebsite: varchar("sourceWebsite", { length: 255 }).notNull(),
     companyLocation: varchar("companyLocation", { length: 255 }),
@@ -220,3 +221,29 @@ export const questionnaire = pgTable("questionnaires", {
 });
 
 export type Questionnaire = InferSelectModel<typeof questionnaire>;
+
+// Questionnaire table
+export const teamMember = pgTable(
+  "teamMember",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    first_name: varchar("first_name", { length: 255 }),
+    last_name: varchar("last_name", { length: 255 }),
+    designation: varchar("designation", { length: 255 }),
+    linkedin_url: varchar("linkedin_url", { length: 255 }),
+    company_url: varchar("company_url", { length: 255 }),
+    company_name: varchar("company_name", { length: 255 }),
+    created_at: timestamp("created_at").defaultNow().notNull(),
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    // Unique constraint on first_name, last_name, and company_name
+    uniqueNameCompany: uniqueIndex("unique_name_company").on(
+      table.first_name,
+      table.last_name,
+      table.company_name
+    ),
+  })
+);
+
+export type TeamMember = InferSelectModel<typeof teamMember>;
