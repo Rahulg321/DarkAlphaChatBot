@@ -29,16 +29,16 @@ export async function POST(request: Request) {
           created_at: new Date(),
           updated_at: new Date(),
         };
-        await db
-          .insert(teamMember)
-          .values(member)
-          .onConflictDoNothing({
-            target: [
-              teamMember.first_name,
-              teamMember.last_name,
-              teamMember.company_name,
-            ],
-          });
+        // await db
+        //   .insert(teamMember)
+        //   .values(member)
+        //   .onConflictDoNothing({
+        //     target: [
+        //       teamMember.first_name,
+        //       teamMember.last_name,
+        //       teamMember.company_name,
+        //     ],
+        //   });
       }
       return NextResponse.json(
         {
@@ -77,12 +77,12 @@ export async function POST(request: Request) {
           createdAt: new Date(),
           updatedAt: new Date(),
         };
-        await db
-          .insert(deal)
-          .values(dealData)
-          .onConflictDoNothing({
-            target: [deal.brokerage, deal.title, deal.industry],
-          });
+        // await db
+        //   .insert(deal)
+        //   .values(dealData)
+        //   .onConflictDoNothing({
+        //     target: [deal.brokerage, deal.title, deal.industry],
+        //   });
       }
       return NextResponse.json(
         {

@@ -7,14 +7,6 @@ import { z } from "zod";
 export const sheetDocumentHandler = createDocumentHandler<"sheet">({
   kind: "sheet",
   onCreateDocument: async ({ id, title, dataStream, session, content }) => {
-    console.log("Parameters received in sheetDocumentHandler:", {
-      id,
-      title,
-      dataStream,
-      session,
-      content,
-    });
-
     let draftContent = "";
 
     // If content is provided, use it directly as the CSV data

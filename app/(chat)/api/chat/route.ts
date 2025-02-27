@@ -26,6 +26,7 @@ import { updateDocument } from "@/lib/ai/tools/update-document";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { scrapeUrlTool } from "@/lib/ai/tools/scrape-url-tool";
+import { mapUrlTool } from "@/lib/ai/tools/map-url";
 
 export const maxDuration = 60;
 
@@ -77,6 +78,7 @@ export async function POST(request: Request) {
             ? []
             : [
                 "getWeather",
+                "mapUrlTool",
                 "scrapeUrlTool",
                 "createDocument",
                 "updateDocument",
@@ -87,6 +89,7 @@ export async function POST(request: Request) {
         tools: {
           getWeather,
           scrapeUrlTool: scrapeUrlTool,
+          mapUrlTool,
           createDocument: createDocument({ session, dataStream }),
           updateDocument: updateDocument({ session, dataStream }),
           requestSuggestions: requestSuggestions({
