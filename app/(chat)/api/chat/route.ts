@@ -25,6 +25,7 @@ import { createDocument } from "@/lib/ai/tools/create-document";
 import { updateDocument } from "@/lib/ai/tools/update-document";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { getWeather } from "@/lib/ai/tools/get-weather";
+import { scrapeUrlTool } from "@/lib/ai/tools/scrape-url-tool";
 
 export const maxDuration = 60;
 
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
   }: { id: string; messages: Array<Message>; selectedChatModel: string } =
     await request.json();
 
-  console.log("selected chat model", selectedChatModel);
+  console.log({ id, messages, selectedChatModel });
   console.log("called the post function");
   const session = await auth();
 
@@ -45,6 +46,8 @@ export async function POST(request: Request) {
   }
 
   const userMessage = getMostRecentUserMessage(messages);
+
+  console.log("user message", userMessage);
 
   if (!userMessage) {
     return new Response("No user message found", { status: 400 });
@@ -68,12 +71,13 @@ export async function POST(request: Request) {
         model: myProvider.languageModel(selectedChatModel),
         system: systemPrompt({ selectedChatModel }),
         messages,
-        maxSteps: 5,
+        maxSteps: 8,
         experimental_activeTools:
           selectedChatModel === "chat-model-reasoning"
             ? []
             : [
                 "getWeather",
+                "scrapeUrlTool",
                 "createDocument",
                 "updateDocument",
                 "requestSuggestions",
@@ -82,6 +86,7 @@ export async function POST(request: Request) {
         experimental_generateMessageId: generateUUID,
         tools: {
           getWeather,
+          scrapeUrlTool: scrapeUrlTool,
           createDocument: createDocument({ session, dataStream }),
           updateDocument: updateDocument({ session, dataStream }),
           requestSuggestions: requestSuggestions({
@@ -96,6 +101,11 @@ export async function POST(request: Request) {
                 messages: response.messages,
                 reasoning,
               });
+
+              console.log(
+                "sanitized response messages",
+                sanitizedResponseMessages
+              );
 
               await saveMessages({
                 messages: sanitizedResponseMessages.map((message) => {

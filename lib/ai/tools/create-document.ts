@@ -19,9 +19,17 @@ export const createDocument = ({ session, dataStream }: CreateDocumentProps) =>
     parameters: z.object({
       title: z.string(),
       kind: z.enum(artifactKinds),
+      content: z
+        .string()
+        .optional()
+        .describe(
+          "The content to include in the document, such as scraped data"
+        ),
     }),
-    execute: async ({ title, kind }) => {
+    execute: async ({ title, kind, content }) => {
       const id = generateUUID();
+
+      console.log("content received inside createDocumentTool", content);
 
       dataStream.writeData({
         type: "kind",
@@ -52,11 +60,20 @@ export const createDocument = ({ session, dataStream }: CreateDocumentProps) =>
         throw new Error(`No document handler found for kind: ${kind}`);
       }
 
+      console.log("Calling documentHandler.onCreateDocument with:", {
+        id,
+        title,
+        dataStream,
+        session,
+        content,
+      });
+
       await documentHandler.onCreateDocument({
         id,
         title,
         dataStream,
         session,
+        content,
       });
 
       dataStream.writeData({ type: "finish", content: "" });

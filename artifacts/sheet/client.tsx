@@ -7,9 +7,10 @@ import {
   UndoIcon,
 } from "@/components/icons";
 import { SpreadsheetEditor } from "@/components/sheet-editor";
+import { Download } from "lucide-react";
 import { parse, unparse } from "papaparse";
 import { toast } from "sonner";
-
+import * as XLSX from "xlsx";
 type Metadata = any;
 
 export const sheetArtifact = new Artifact<"sheet", Metadata>({
@@ -44,6 +45,42 @@ export const sheetArtifact = new Artifact<"sheet", Metadata>({
     );
   },
   actions: [
+    {
+      icon: <Download size={18} />,
+      description: "Download Sheet Content",
+      onClick: ({ content, handleVersionChange }) => {
+        // console.log("content to download", content);
+        // Parse the CSV content into an array of arrays
+        const parsed = parse(content, { delimiter: "," });
+
+        // Filter out rows where all cells are empty or whitespace
+        const nonEmptyRows = parsed.data.filter((row: any) =>
+          row.some((cell: any) => cell.trim() !== "")
+        );
+
+        // Create an Excel worksheet from the cleaned data
+        // @ts-ignore
+        const ws = XLSX.utils.aoa_to_sheet(nonEmptyRows);
+
+        // Create a new workbook and append the worksheet
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+        // Write the workbook to an array buffer (XLSX format)
+        const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+
+        // Create a Blob for the Excel file
+        const blob = new Blob([wbout], { type: "application/octet-stream" });
+
+        // Generate a URL and trigger the download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "sheet.xlsx"; // Filename for the downloaded file
+        a.click();
+        URL.revokeObjectURL(url); // Clean up the URL
+      },
+    },
     {
       icon: <UndoIcon size={18} />,
       description: "View Previous version",

@@ -6,45 +6,64 @@ import { z } from "zod";
 
 export const sheetDocumentHandler = createDocumentHandler<"sheet">({
   kind: "sheet",
-  onCreateDocument: async ({ title, dataStream }) => {
-    let draftContent = "";
-
-    const { fullStream } = streamObject({
-      model: myProvider.languageModel("artifact-model"),
-      system: sheetPrompt,
-      prompt: title,
-      schema: z.object({
-        csv: z.string().describe("CSV data"),
-      }),
+  onCreateDocument: async ({ id, title, dataStream, session, content }) => {
+    console.log("Parameters received in sheetDocumentHandler:", {
+      id,
+      title,
+      dataStream,
+      session,
+      content,
     });
 
-    for await (const delta of fullStream) {
-      const { type } = delta;
+    let draftContent = "";
 
-      if (type === "object") {
-        const { object } = delta;
-        const { csv } = object;
+    // If content is provided, use it directly as the CSV data
+    if (content) {
+      draftContent = content;
+      // Send the provided content to the data stream immediately
+      dataStream.writeData({
+        type: "sheet-delta",
+        content: draftContent,
+      });
+    } else {
+      // If no content is provided, generate CSV using the language model
+      const { fullStream } = streamObject({
+        model: myProvider.languageModel("artifact-model"),
+        system: sheetPrompt,
+        prompt: title,
+        schema: z.object({
+          csv: z.string().describe("CSV data"),
+        }),
+      });
 
-        if (csv) {
-          dataStream.writeData({
-            type: "sheet-delta",
-            content: csv,
-          });
+      for await (const delta of fullStream) {
+        const { type } = delta;
 
-          draftContent = csv;
+        if (type === "object") {
+          const { object } = delta;
+          const { csv } = object;
+
+          if (csv) {
+            dataStream.writeData({
+              type: "sheet-delta",
+              content: csv,
+            });
+            draftContent = csv;
+          }
         }
       }
     }
-
-    dataStream.writeData({
-      type: "sheet-delta",
-      content: draftContent,
-    });
 
     return draftContent;
   },
   onUpdateDocument: async ({ document, description, dataStream }) => {
     let draftContent = "";
+
+    console.log("Description inside server artifact", description);
+
+    if (description.includes("https://")) {
+      console.log("description includes https://");
+    }
 
     const { fullStream } = streamObject({
       model: myProvider.languageModel("artifact-model"),
@@ -67,7 +86,6 @@ export const sheetDocumentHandler = createDocumentHandler<"sheet">({
             type: "sheet-delta",
             content: csv,
           });
-
           draftContent = csv;
         }
       }
