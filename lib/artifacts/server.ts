@@ -22,6 +22,7 @@ export interface CreateDocumentCallbackProps {
   dataStream: DataStreamWriter;
   session: Session;
   content?: string;
+  metadata?: Record<string, any>;
 }
 
 export interface UpdateDocumentCallbackProps {
@@ -51,6 +52,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
         dataStream: args.dataStream,
         session: args.session,
         content: args.content,
+        metadata: args.metadata,
       });
 
       if (args.session?.user?.id) {
@@ -60,6 +62,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
           content: draftContent,
           kind: config.kind,
           userId: args.session.user.id,
+          metadata: args.metadata,
         });
       }
 
@@ -80,6 +83,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
           content: draftContent,
           kind: config.kind,
           userId: args.session.user.id,
+          metadata: args.document.metadata as Record<string, any>,
         });
       }
 

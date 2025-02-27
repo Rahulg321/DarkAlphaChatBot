@@ -6,8 +6,25 @@ import { z } from "zod";
 
 export const sheetDocumentHandler = createDocumentHandler<"sheet">({
   kind: "sheet",
-  onCreateDocument: async ({ id, title, dataStream, session, content }) => {
+  onCreateDocument: async ({
+    id,
+    title,
+    dataStream,
+    session,
+    content,
+    metadata,
+  }) => {
     let draftContent = "";
+
+    // Send metadata to the client
+    if (metadata) {
+      console.log("metadata inside sheet Document Handler", metadata);
+
+      dataStream.writeData({
+        type: "metadata",
+        content: metadata,
+      });
+    }
 
     // If content is provided, use it directly as the CSV data
     if (content) {

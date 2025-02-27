@@ -167,8 +167,12 @@ export const scrapeUrlTool = tool({
       extractionPrompt = `
           Extract all deals from the webpage.
           For each deal, extract:
-          - Deal Name
+          - Deal Name / Deal Title
           - Revenue
+          - State
+          - Category
+          - Under Contract
+          - Asking Price
           - EBITDA
           - Date
           - Deal Caption (if available)
@@ -196,12 +200,19 @@ export const scrapeUrlTool = tool({
       // @ts-ignore
       extractedItemsFromURL = scrapeResponse.data.teamMembers;
     } else if (dataType === "deal") {
-      extractedItemsFromURL = scrapeResponse.data.deal;
+      extractedItemsFromURL = scrapeResponse.data.deals;
     }
 
     console.log("extractedItemsfromURL", extractedItemsFromURL);
 
-    return { scrapedItems: extractedItemsFromURL, dataType: "team-member" };
+    return {
+      title: "Scraped DATA",
+      kind: "sheet",
+      scrapedItems: extractedItemsFromURL,
+      metadata: {
+        dataType,
+      },
+    };
 
     // return { dataType, items, url };
   },

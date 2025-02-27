@@ -13,6 +13,7 @@ import {
   numeric,
   unique,
   uniqueIndex,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 // command to run a docker for connecting postgres
@@ -99,6 +100,7 @@ export const document = pgTable(
     createdAt: timestamp("createdAt").notNull(),
     title: text("title").notNull(),
     content: text("content"),
+    metadata: jsonb("metadata").default({}),
     kind: varchar("text", { enum: ["text", "code", "image", "sheet"] })
       .notNull()
       .default("text"),

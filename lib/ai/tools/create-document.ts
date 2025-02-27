@@ -25,10 +25,22 @@ export const createDocument = ({ session, dataStream }: CreateDocumentProps) =>
         .describe(
           "The content to include in the document, such as scraped data"
         ),
+      metadata: z
+        .object({
+          dataType: z
+            .enum(["team-member", "deal", "raw"])
+            .optional()
+            .describe(
+              "The type of data, e.g., 'team-member' or 'deal' or `raw` if the data is generic"
+            ),
+        })
+        .optional()
+        .describe("Metadata for the document"),
     }),
-    execute: async ({ title, kind, content }) => {
+    execute: async ({ title, kind, content, metadata }) => {
       const id = generateUUID();
 
+      console.log("metadata received in createDocumentHandler Tool", metadata);
       console.log("content received inside createDocumentTool", content);
 
       dataStream.writeData({
@@ -74,6 +86,7 @@ export const createDocument = ({ session, dataStream }: CreateDocumentProps) =>
         dataStream,
         session,
         content,
+        metadata,
       });
 
       dataStream.writeData({ type: "finish", content: "" });

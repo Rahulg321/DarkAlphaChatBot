@@ -11,6 +11,8 @@ import { Database, DatabaseIcon, Download } from "lucide-react";
 import { parse, unparse } from "papaparse";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import axios from "axios";
+
 type Metadata = any;
 
 export const sheetArtifact = new Artifact<"sheet", Metadata>({
@@ -24,6 +26,11 @@ export const sheetArtifact = new Artifact<"sheet", Metadata>({
         content: streamPart.content as string,
         isVisible: true,
         status: "streaming",
+      }));
+    } else if ((streamPart as { type: string }).type === "metadata") {
+      setArtifact((draftArtifact) => ({
+        ...draftArtifact,
+        metadata: streamPart.content,
       }));
     }
   },
@@ -48,17 +55,31 @@ export const sheetArtifact = new Artifact<"sheet", Metadata>({
     {
       icon: <DatabaseIcon size={18} />,
       description: "Upload to Database",
-      onClick: ({ content, handleVersionChange, metadata }) => {
+      onClick: async ({ content, handleVersionChange, metadata }) => {
         console.log("content to save", content);
         console.log("content metadata", metadata);
+
         // Parse CSV content
         // @ts-ignore
         const parsed = parse(content, {
-          columns: true,
+          header: true,
           skip_empty_lines: true,
         });
         const items = parsed;
         console.log("parsed items", items);
+        // Send the items and documentId to the backend using Axios
+        try {
+          const response = await axios.post("/api/save-data", {
+            documentId: id, // Unique identifier for the document
+            items, // Parsed CSV data
+          });
+
+          console.log("Data saved:", response.data);
+          toast.success("Data saved to database"); // Optional success message
+        } catch (error) {
+          console.error("Error saving data:", error);
+          toast.error("Failed to save data"); // Optional error message
+        }
       },
     },
     {

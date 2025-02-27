@@ -173,12 +173,14 @@ export async function saveDocument({
   kind,
   content,
   userId,
+  metadata = {},
 }: {
   id: string;
   title: string;
   kind: ArtifactKind;
   content: string;
   userId: string;
+  metadata?: Record<string, any>;
 }) {
   try {
     return await db.insert(document).values({
@@ -187,6 +189,7 @@ export async function saveDocument({
       kind,
       content,
       userId,
+      metadata,
       createdAt: new Date(),
     });
   } catch (error) {

@@ -11,6 +11,7 @@ This is a guide for using artifacts tools: \`createDocument\` and \`updateDocume
 
 **When to use \`createDocument\`:**
 - For substantial content (>10 lines) or code
+- For list of content or contents to presented in a list
 - When user wants to scrape a URL and present the contents inside a spreadsheet
 - For content users will likely save/reuse (emails, code, essays, etc.)
 - When explicitly requested to create a document
