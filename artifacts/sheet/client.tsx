@@ -68,18 +68,18 @@ export const sheetArtifact = new Artifact<"sheet", Metadata>({
         const items = parsed;
         console.log("parsed items", items);
         // Send the items and documentId to the backend using Axios
-        try {
-          const response = await axios.post("/api/save-data", {
-            documentId: id, // Unique identifier for the document
-            items, // Parsed CSV data
-          });
+        // try {
+        //   const response = await axios.post("/api/save-data", {
+        //     documentId: id, // Unique identifier for the document
+        //     items, // Parsed CSV data
+        //   });
 
-          console.log("Data saved:", response.data);
-          toast.success("Data saved to database"); // Optional success message
-        } catch (error) {
-          console.error("Error saving data:", error);
-          toast.error("Failed to save data"); // Optional error message
-        }
+        //   console.log("Data saved:", response.data);
+        //   toast.success("Data saved to database"); // Optional success message
+        // } catch (error) {
+        //   console.error("Error saving data:", error);
+        //   toast.error("Failed to save data"); // Optional error message
+        // }
       },
     },
     {
