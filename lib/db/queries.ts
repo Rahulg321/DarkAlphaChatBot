@@ -289,6 +289,7 @@ export async function getSuggestionsByDocumentId({
 
 export async function getMessageById({ id }: { id: string }) {
   try {
+    console.log("getting message from id", id);
     return await db.select().from(message).where(eq(message.id, id));
   } catch (error) {
     console.error("Failed to get message by id from database");

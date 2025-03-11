@@ -25,7 +25,9 @@ export const dealTypeEnum = pgEnum("deal_type", [
   "MANUAL",
   "AI_INFERRED",
 ]);
+
 export const simStatusEnum = pgEnum("sim_status", ["IN_PROGRESS", "COMPLETED"]);
+
 export const sentimentEnum = pgEnum("sentiment", [
   "POSITIVE",
   "NEUTRAL",
